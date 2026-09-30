@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotaioNext - Check-up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body, button, input, select, span { font-family: 'Fira Sans', sans-serif !important; }
+
+        /* Stile personalizzato per la selezione delle opzioni */
+        .option-card input[type="radio"]:checked + div {
+            border-color: #3a7aba;
+            background-color: rgba(58, 122, 186, 0.05);
+        }
+        .option-card input[type="radio"]:checked + div .num-circle {
+            background-color: #3a7aba;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white rounded-3xl shadow-xl max-w-3xl w-full p-8 md:p-12 relative min-h-[520px] flex flex-col justify-between">
+        
+        <form id="quizForm" action="/calcola" method="POST" novalidate class="h-full flex flex-col justify-between grow">
+            
+            <!-- STEP 0: DATI DELLO STUDIO -->
+            <div class="step-content" id="step-0">
+                <div>
+                    <span class="text-xs font-bold tracking-widest text-[#3a7aba] uppercase block mb-1">DATI DELLO STUDIO</span>
+                    <h1 class="text-4xl font-black text-gray-900 mb-2">Prima di iniziare</h1>
+                    <p class="text-gray-600 mb-8">Inserisci i dati dello Studio. Serviranno per associare il risultato e preparare il report finale.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nome dello Studio *</label>
+                            <input type="text" name="nome_studio" placeholder="Es. Studio Notarile Rossi" required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Luogo *</label>
+                            <input type="text" name="luogo" placeholder="Es. Milano" required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nome del Notaio *</label>
+                            <input type="text" name="nome_notaio" placeholder="Nome e cognome" required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Numero di telefono *</label>
+                            <input type="tel" name="telefono" placeholder="+39 ..." required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">E-mail *</label>
+                            <input type="email" name="email" placeholder="nome@studio.it" required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 1: DOMANDA 1 -->
+            <div class="step-content hidden" id="step-1">
+                <div>
+                    <span class="inline-block bg-[#3a7aba]/10 text-[#3a7aba] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">AI & Innovazione</span>
+                    <p class="text-xs font-semibold text-gray-400 mb-2">Domanda 1 di 5</p>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Quanto è evoluto oggi l'utilizzo dell'AI nel tuo Studio?</h2>
+                    
+                    <div class="space-y-3">
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q1_ai" value="1" required class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">1</span>
+                                <span class="text-gray-800 font-medium">Non utilizziamo strumenti di AI.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q1_ai" value="2" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">2</span>
+                                <span class="text-gray-800 font-medium">Abbiamo iniziato a sperimentarli occasionalmente.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q1_ai" value="3" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">3</span>
+                                <span class="text-gray-800 font-medium">Alcune persone dello Studio li utilizzano con una certa frequenza.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q1_ai" value="4" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">4</span>
+                                <span class="text-gray-800 font-medium">Abbiamo individuato attività in cui utilizzare l'AI in modo strutturato.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q1_ai" value="5" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">5</span>
+                                <span class="text-gray-800 font-medium">L'AI è già integrata in processi e attività dello Studio.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: DOMANDA 2 -->
+            <div class="step-content hidden" id="step-2">
+                <div>
+                    <span class="inline-block bg-[#3a7aba]/10 text-[#3a7aba] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">Antiriciclaggio</span>
+                    <p class="text-xs font-semibold text-gray-400 mb-2">Domanda 2 di 5</p>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Quanto è strutturato e digitale oggi il processo antiriciclaggio?</h2>
+                    
+                    <div class="space-y-3">
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q2_antiriciclaggio" value="1" required class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">1</span>
+                                <span class="text-gray-800 font-medium">È prevalentemente manuale.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q2_antiriciclaggio" value="2" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">2</span>
+                                <span class="text-gray-800 font-medium">Utilizziamo alcuni strumenti, ma in modo frammentato.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q2_antiriciclaggio" value="3" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">3</span>
+                                <span class="text-gray-800 font-medium">Abbiamo procedure definite e strumenti organizzati.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q2_antiriciclaggio" value="4" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">4</span>
+                                <span class="text-gray-800 font-medium">Il processo è digitale, strutturato e tracciabile.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q2_antiriciclaggio" value="5" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">5</span>
+                                <span class="text-gray-800 font-medium">Il processo è integrato, tracciabile e monitorato in modo sistematico.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: DOMANDA 3 -->
+            <div class="step-content hidden" id="step-3">
+                <div>
+                    <span class="inline-block bg-[#3a7aba]/10 text-[#3a7aba] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">Organizzazione dello Studio</span>
+                    <p class="text-xs font-semibold text-gray-400 mb-2">Domanda 3 di 5</p>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Come è organizzata oggi l'infrastruttura digitale e documentale del tuo Studio?</h2>
+                    
+                    <div class="space-y-3">
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q3_organizzazione" value="1" required class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">1</span>
+                                <span class="text-gray-800 font-medium">Lavoriamo prevalentemente con un'infrastruttura client-server e i documenti sono gestiti localmente.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q3_organizzazione" value="2" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">2</span>
+                                <span class="text-gray-800 font-medium">Siamo ancora principalmente client-server, ma utilizziamo alcuni servizi cloud.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q3_organizzazione" value="3" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">3</span>
+                                <span class="text-gray-800 font-medium">Il gestionale e le principali attività dello Studio sono in cloud.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q3_organizzazione" value="4" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">4</span>
+                                <span class="text-gray-800 font-medium">Siamo in cloud e abbiamo già digitalizzato e automatizzato diversi processi operativi.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q3_organizzazione" value="5" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">5</span>
+                                <span class="text-gray-800 font-medium">Siamo in cloud, con processi automatizzati e archiviazione documentale completamente digitalizzata e integrata.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: DOMANDA 4 -->
+            <div class="step-content hidden" id="step-4">
+                <div>
+                    <span class="inline-block bg-[#3a7aba]/10 text-[#3a7aba] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">Comunicazione digitale</span>
+                    <p class="text-xs font-semibold text-gray-400 mb-2">Domanda 4 di 5</p>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Quanto è strutturata oggi la presenza digitale del tuo Studio?</h2>
+                    
+                    <div class="space-y-3">
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q4_comunicazione" value="1" required class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">1</span>
+                                <span class="text-gray-800 font-medium">Non abbiamo un sito web e la nostra presenza digitale è minima.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q4_comunicazione" value="2" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">2</span>
+                                <span class="text-gray-800 font-medium">Abbiamo una presenza digitale prevalentemente istituzionale.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q4_comunicazione" value="3" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">3</span>
+                                <span class="text-gray-800 font-medium">Abbiamo un sito web aggiornato che rappresenta adeguatamente lo Studio.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q4_comunicazione" value="4" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">4</span>
+                                <span class="text-gray-800 font-medium">Abbiamo un sito e utilizziamo con una certa continuità altri canali digitali.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q4_comunicazione" value="5" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">5</span>
+                                <span class="text-gray-800 font-medium">La presenza digitale è strutturata e fa parte della strategia dello Studio.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: DOMANDA 5 -->
+            <div class="step-content hidden" id="step-5">
+                <div>
+                    <span class="inline-block bg-[#3a7aba]/10 text-[#3a7aba] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">Controllo di gestione</span>
+                    <p class="text-xs font-semibold text-gray-400 mb-2">Domanda 5 di 5</p>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Quanto utilizzate dati e KPI per prendere decisioni nello Studio?</h2>
+                    
+                    <div class="space-y-3">
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q5_controllo" value="1" required class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">1</span>
+                                <span class="text-gray-800 font-medium">Quasi mai: lavoriamo prevalentemente a consuntivo.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q5_controllo" value="2" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">2</span>
+                                <span class="text-gray-800 font-medium">Facciamo analisi occasionali.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q5_controllo" value="3" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">3</span>
+                                <span class="text-gray-800 font-medium">Monitoriamo periodicamente alcuni indicatori.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q5_controllo" value="4" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">4</span>
+                                <span class="text-gray-800 font-medium">Utilizziamo KPI definiti per monitorare lo Studio.</span>
+                            </div>
+                        </label>
+                        <label class="option-card block cursor-pointer">
+                            <input type="radio" name="q5_controllo" value="5" class="hidden">
+                            <div class="flex items-center p-4 border-2 border-gray-200 rounded-2xl transition hover:border-[#3a7aba]">
+                                <span class="num-circle w-8 h-8 rounded-full bg-gray-200 text-gray-700 font-bold flex items-center justify-center mr-4 shrink-0">5</span>
+                                <span class="text-gray-800 font-medium">Dati, KPI e dashboard supportano sistematicamente le decisioni.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PULSANTI DI NAVIGAZIONE IN BASSO -->
+            <div class="flex justify-between items-center pt-8 mt-6 border-t border-gray-100">
+                <button type="button" id="btnPrev" onclick="changeStep(-1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-xl transition hidden">
+                    ← Indietro
+                </button>
+                
+                <div></div>
+
+                <button type="button" id="btnNext" onclick="changeStep(1)" class="bg-[#3a7aba] hover:bg-[#2d6195] text-white font-bold py-3 px-8 rounded-xl transition shadow-lg">
+                    Continua &rarr;
+                </button>
+
+                <button type="button" id="btnSubmit" onclick="submitQuiz()" class="bg-[#3a7aba] hover:bg-[#2d6195] text-white font-bold py-3 px-8 rounded-xl transition shadow-lg hidden">
+                    Calcola il risultato &rarr;
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+    let currentStep = 0;
+    const totalSteps = 5;
+
+    function showStep(step) {
+        document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById(`step-${step}`).classList.remove('hidden');
+
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        const btnSubmit = document.getElementById('btnSubmit');
+
+        if (step === 0) {
+            btnPrev.classList.add('hidden');
+            btnNext.classList.remove('hidden');
+            btnSubmit.classList.add('hidden');
+        } else if (step === totalSteps) {
+            btnPrev.classList.remove('hidden');
+            btnNext.classList.add('hidden');
+            btnSubmit.classList.remove('hidden');
+        } else {
+            btnPrev.classList.remove('hidden');
+            btnNext.classList.remove('hidden');
+            btnSubmit.classList.add('hidden');
+        }
+        currentStep = step;
+    }
+
+    function validateStep(step) {
+        const currentDiv = document.getElementById(`step-${step}`);
+        if (!currentDiv) return true;
+        
+        const inputs = currentDiv.querySelectorAll('input[required]');
+        
+        for (let input of inputs) {
+            if (input.type === 'radio') {
+                const radioGroup = currentDiv.querySelectorAll(`input[name="${input.name}"]`);
+                let checked = false;
+                radioGroup.forEach(r => { if (r.checked) checked = true; });
+                if (!checked) {
+                    alert('Seleziona un\'opzione per proseguire.');
+                    return false;
+                }
+            } else if (!input.value.trim()) {
+                alert('Compila tutti i campi obbligatori per proseguire.');
+                input.focus();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function validateAllSteps() {
+        for (let s = 0; s <= totalSteps; s++) {
+            if (!validateStep(s)) {
+                showStep(s); // Riporta l'utente allo step dove manca il dato
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function changeStep(delta) {
+        if (delta > 0 && !validateStep(currentStep)) {
+            return;
+        }
+        
+        let nextStep = currentStep + delta;
+        if (nextStep < 0) nextStep = 0;
+        if (nextStep > totalSteps) nextStep = totalSteps;
+
+        showStep(nextStep);
+    }
+
+    function submitQuiz() {
+        if (validateAllSteps()) {
+            document.getElementById('quizForm').submit();
+        }
+    }
+
+    showStep(0);
+</script>
+</body>
+</html>
