@@ -121,5 +121,29 @@
             html2pdf().set(opt).from(element).save();
         }
     </script>
+	<style>
+@media print {
+    /* Riduce leggermente la dimensione globale per far entrare tutto in una pagina A4 */
+    body {
+        zoom: 0.85; /* Se ancora non entra, prova ad abbassarlo a 0.80 o 0.75 */
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Rimuove ombre e margini esterni che occupano spazio inutile nel PDF */
+    .container, .card, section {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 auto !important;
+        padding: 10px !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Nasconde automaticamente il pulsante "Scarica PDF" o "Torna alla Home" nel documento stampato */
+    button, .btn, #pulsante-stampa {
+        display: none !important;
+    }
+}
+</style>
 </body>
 </html>
