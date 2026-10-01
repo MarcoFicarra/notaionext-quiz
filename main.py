@@ -31,7 +31,8 @@ def init_db():
             telefono TEXT,
             luogo TEXT,
             punteggio_totale INTEGER,
-            area_prioritaria TEXT
+            area_prioritaria TEXT,
+            voucher_richiesto TEXT DEFAULT 'NO'
         )
     ''')
     conn.commit()
@@ -54,20 +55,21 @@ def salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, tot
         sheet = client.open("Risultati Quiz NotaioNext").sheet1
         data_ora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Inserisce sempre in riga 2 (in cima): il lead più recente sarà subito sotto l'intestazione
+        # Inserisce in riga 2 con colonna J (Voucher Richiesto) impostata inizialmente a 'NO'
         sheet.insert_row(
-            [data_ora, nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria],
+            [data_ora, nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria, "NO"],
             index=2,
             value_input_option="USER_ENTERED"
         )
         print("Dati salvati con successo su Google Sheets!")
     except Exception as e:
         print(f"Errore durante il salvataggio su Google Sheets: {e}")
-        
+
+
 # --- FUNZIONE NOTIFICA EMAIL GMAIL ---
 def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luogo, totale, profilo, area_prioritaria):
     mittente = "notaionextwki@gmail.com"
-    password = "jlut onuz wyah quvj"  # <-- Sostituisci con la tua Password per le App di 16 lettere creata su Google
+    password = "TUA_PASSWORD_DI_16_LETTERE"  # <-- Sostituisci con la tua Password per le App di 16 lettere
     destinatario = "notaionextwki@gmail.com"
     server_smtp = "smtp.gmail.com"
     porta_smtp = 587
@@ -96,7 +98,7 @@ def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luog
 
     Data compilazione: {datetime.now().strftime("%d/%m/%Y %H:%M")}
     --------------------------------------------------
-    I dati sono stati salvati automaticamente anche su Google Sheets e nel DB SQLite locale.
+    I dati sono stati salvati automaticamente su Google Sheets e SQLite.
     """
     msg.attach(MIMEText(corpo, 'plain', 'utf-8'))
 
@@ -111,7 +113,7 @@ def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luog
         print(f"Errore durante l'invio dell'e-mail: {e}")
 
 
-# Mappatura dei Voucher d'offerta per ogni Area Prioritaria
+# Mappatura Voucher
 VOUCHER_MAP = {
     "AI & Innovazione": {
         "titolo": "Corso AI & Innovazione Studio",
@@ -177,23 +179,22 @@ async def calcola_risultati(
     area_prioritaria = min(punteggi, key=punteggi.get)
     punti_area = punteggi[area_prioritaria]
     voucher_info = VOUCHER_MAP.get(area_prioritaria, VOUCHER_MAP["Antiriciclaggio"])
-
     percentuale_pos = int(((totale - 5) / 20) * 100)
 
-    # 1. Salvataggio nel Database SQLite locale
+    # 1. Salvataggio SQLite
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO leads (nome_studio, nome_notaio, email, telefono, luogo, punteggio_totale, area_prioritaria)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO leads (nome_studio, nome_notaio, email, telefono, luogo, punteggio_totale, area_prioritaria, voucher_richiesto)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'NO')
     ''', (nome_studio, nome_notaio, email, telefono, luogo, totale, area_prioritaria))
     conn.commit()
     conn.close()
 
-    # 2. Salvataggio in tempo reale su Google Sheets
+    # 2. Salvataggio Google Sheets
     salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria)
 
-    # 3. Invia notifica e-mail via Gmail
+    # 3. Notifica email
     invia_email_notifica(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria)
 
     return templates.TemplateResponse(
@@ -202,7 +203,7 @@ async def calcola_risultati(
         context={
             "nome_studio": nome_studio,
             "nome_notaio": nome_notaio,
-            "email": email,  # <-- AGGIUNTO QUI
+            "email": email,
             "telefono": telefono,
             "luogo": luogo,
             "totale": totale,
@@ -213,28 +214,28 @@ async def calcola_risultati(
             "voucher_info": voucher_info,
             "percentuale_pos": percentuale_pos
         }
-        @app.post("/attiva-voucher")
+    )
+
+
+@app.post("/attiva-voucher")
 async def attiva_voucher(request: Request):
     data = await request.json()
     email_cliente = data.get("email")
+
+    if not email_cliente:
+        return {"status": "error", "message": "Email mancante"}, 400
 
     # 1. Aggiorna SQLite locale
     try:
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        cursor.execute("ALTER TABLE leads ADD COLUMN voucher_richiesto TEXT DEFAULT 'NO'")
+        cursor.execute("UPDATE leads SET voucher_richiesto = 'SÌ' WHERE email = ?", (email_cliente,))
         conn.commit()
         conn.close()
-    except Exception:
-        pass  # La colonna esiste già
+    except Exception as e:
+        print(f"Errore aggiornamento DB locale: {e}")
 
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("UPDATE leads SET voucher_richiesto = 'SÌ' WHERE email = ?", (email_cliente,))
-    conn.commit()
-    conn.close()
-
-    # 2. Aggiorna Google Sheets (Colonna J = Colonna 10)
+    # 2. Aggiorna Google Sheets (Colonna J / 10)
     try:
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
@@ -244,7 +245,6 @@ async def attiva_voucher(request: Request):
         client = gspread.authorize(creds)
         sheet = client.open("Risultati Quiz NotaioNext").sheet1
 
-        # Cerca la riga corrispondente all'email dell'utente
         cell = sheet.find(email_cliente)
         if cell:
             sheet.update_cell(cell.row, 10, "SÌ")
@@ -253,4 +253,3 @@ async def attiva_voucher(request: Request):
         print(f"Errore durante l'aggiornamento del voucher su Google Sheets: {e}")
 
     return {"status": "success"}
-    )
