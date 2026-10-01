@@ -51,14 +51,13 @@ def salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, tot
         creds = Credentials.from_service_account_file("credentials.json", scopes=scopes)
         client = gspread.authorize(creds)
         
-        # Abre il foglio Google "Risultati Quiz NotaioNext"
         sheet = client.open("Risultati Quiz NotaioNext").sheet1
         data_ora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Inserisce la nuova riga alla posizione 2
-       # Aggiunge la riga in coda, permettendo a Google di applicare i colori alternati in automatico
-        sheet.append_row(
+        # Inserisce sempre in riga 2 (in cima): il lead più recente sarà subito sotto l'intestazione
+        sheet.insert_row(
             [data_ora, nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria],
+            index=2,
             value_input_option="USER_ENTERED"
         )
         print("Dati salvati con successo su Google Sheets!")
