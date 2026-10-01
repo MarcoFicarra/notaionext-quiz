@@ -55,11 +55,13 @@ def salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, tot
         sheet = client.open("Risultati Quiz NotaioNext").sheet1
         data_ora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Inserisce la riga in fondo al foglio
-        sheet.append_row([data_ora, nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria])
-        print("Dati salvati con successo su Google Sheets!")
-    except Exception as e:
-        print(f"Errore durante il salvataggio su Google Sheets: {e}")
+# Inserisce sempre una nuova riga alla posizione 2 (subito sotto l'intestazione),
+        # spingendo i vecchi lead verso il basso. I più recenti saranno in cima!
+        sheet.insert_row(
+            [data_ora, nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria],
+            index=2,
+            value_input_option="USER_ENTERED"
+        )
 
 
 # --- FUNZIONE NOTIFICA EMAIL GMAIL ---
