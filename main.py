@@ -3,6 +3,12 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import sqlite3
+import os
+import smtplib
+from datetime import datetime
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from openpyxl import Workbook, load_workbook
 
 app = FastAPI()
 
@@ -28,6 +34,74 @@ def init_db():
     conn.close()
 
 init_db()
+
+# --- FUNZIONE SALVATAGGIO EXCEL ---
+def salva_su_excel(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria):
+    file_excel = "risultati_quiz.xlsx"
+    data_ora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    try:
+        if not os.path.exists(file_excel):
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Leads Quiz"
+            ws.append(["Data/Ora", "Nome Studio", "Nome Notaio", "Email", "Telefono", "Luogo", "Punteggio Totale", "Profilo", "Area Prioritaria"])
+        else:
+            wb = load_workbook(file_excel)
+            ws = wb.active
+
+        ws.append([data_ora, nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria])
+        wb.save(file_excel)
+    except Exception as e:
+        print(f"Errore durante la scrittura su Excel: {e}")
+
+# --- FUNZIONE NOTIFICA EMAIL ---
+def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luogo, totale, profilo, area_prioritaria):
+    # ⚠️ CONFIGURA QUI I TUOI DATI DI INVIO EMAIL ⚠️
+    mittente = "tuaemail@dominio.it"          # Indirizzo email da cui inviare
+    password = "TUA_PASSWORD_O_TOKEN"         # Password della mail (o Password per le App)
+    destinatario = "tuaemail@dominio.it"      # Dove vuoi ricevere la notifica
+    server_smtp = "smtp.ionos.it"            # Es: smtp.ionos.it oppure smtp.gmail.com
+    porta_smtp = 587                         # Porta standard TLS (587)
+    # ----------------------------------------------
+
+    msg = MIMEMultipart()
+    msg['From'] = mittente
+    msg['To'] = destinatario
+    msg['Subject'] = f"Nuovo Lead Quiz NotaioNext: {nome_studio} - {nome_notaio}"
+
+    corpo = f"""
+    È stato completato un nuovo Quiz su NotaioNext!
+
+    DETTAGLI CLIENTE:
+    --------------------------------------------------
+    Nome Studio: {nome_studio}
+    Nome Notaio: {nome_notaio}
+    Email: {email_cliente}
+    Telefono: {telefono}
+    Luogo: {luogo}
+
+    ESITO QUIZ:
+    --------------------------------------------------
+    Punteggio Totale: {totale} / 25
+    Profilo: {profilo}
+    Area Prioritaria: {area_prioritaria}
+
+    Data compilazione: {datetime.now().strftime("%d/%m/%Y %H:%M")}
+    --------------------------------------------------
+    I dati sono stati salvati anche nel DB SQLite e nel file Excel 'risultati_quiz.xlsx' sul server.
+    """
+    msg.attach(MIMEText(corpo, 'plain', 'utf-8'))
+
+    try:
+        server = smtplib.SMTP(server_smtp, porta_smtp)
+        server.starttls()
+        server.login(mittente, password)
+        server.send_message(msg)
+        server.quit()
+    except Exception as e:
+        print(f"Errore durante l'invio dell'e-mail: {e}")
+
 
 # Mappatura dei Voucher d'offerta per ogni Area Prioritaria
 VOUCHER_MAP = {
@@ -97,7 +171,7 @@ async def calcola_risultati(
     # Calcolo percentuale per la posizione dell'indicatore sulla barra (range 5-25)
     percentuale_pos = int(((totale - 5) / 20) * 100)
 
-    # Salvataggio nel Database
+    # 1. Salvataggio nel Database SQLite
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     cursor.execute('''
@@ -106,6 +180,12 @@ async def calcola_risultati(
     ''', (nome_studio, nome_notaio, email, telefono, luogo, totale, area_prioritaria))
     conn.commit()
     conn.close()
+
+    # 2. Salvataggio automatico nel file Excel (risultati_quiz.xlsx)
+    salva_su_excel(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria)
+
+    # 3. Invia notifica e-mail
+    invia_email_notifica(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria)
 
     return templates.TemplateResponse(
         request=request,

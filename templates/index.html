@@ -24,25 +24,78 @@
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-    <div class="bg-white rounded-3xl shadow-xl max-w-3xl w-full p-8 md:p-12 relative min-h-[520px] flex flex-col justify-between">
+    <div class="bg-white rounded-3xl shadow-xl max-w-4xl w-full p-8 md:p-12 relative min-h-[520px] flex flex-col justify-between">
         
         <form id="quizForm" action="/calcola" method="POST" novalidate class="h-full flex flex-col justify-between grow">
             
-            <!-- STEP 0: DATI DELLO STUDIO -->
-            <div class="step-content" id="step-0">
+            <!-- SCHERMATA INIZIALE DI BENVENUTO (STEP WELCOME) -->
+            <div class="step-content" id="step-welcome">
+                <div>
+                    <!-- TESTATA: TAG A SINISTRA E LOGO WOLTERS KLUWER IN ALTO A DESTRA -->
+                  <div class="flex items-start justify-between mb-4">
+                    <span class="text-xs font-bold tracking-widest text-[#3a7aba] uppercase block pt-1">CONGRESSO NAZIONALE DEL NOTARIATO</span>
+                    <img src="https://cdn.wolterskluwer.io/wk/jumpstart-v3-assets/0.x.x/logo/wk-logo-primary-pos-large.svg" alt="Wolters Kluwer" class="h-8 w-auto">
+                    </div>
+                    
+                    <!-- NOME SOFTWARE NOTAIONEXT -->
+                    <h1 class="text-4xl text-gray-900 mt-6 mb-8 leading-snug" style="font-weight: 600;"><strong>NotaioNext</strong></h1>
+
+                    <!-- HEADLINE & SUBHEADLINE -->
+                  <h2 class="text-2xl md:text-3xl font-black text-gray-900 mb-3">Quanto è evoluto oggi il tuo Studio?</h2>
+                    <p class="text-gray-600 text-base mb-8 max-w-2xl">Un check-up rapido per capire il livello di evoluzione del tuo Studio Notarile attraverso cinque dimensioni fondamentali.</p>
+                    
+                    <!-- 5 SCHEDE DIMENSIONI -->
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10">
+                        <div class="p-4 border border-gray-200 rounded-2xl bg-gray-50/50">
+                            <span class="text-[#3a7aba] font-bold text-xs block mb-2">01</span>
+                            <span class="text-gray-900 font-bold text-sm leading-snug block">AI & Innovazione</span>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-2xl bg-gray-50/50">
+                            <span class="text-[#3a7aba] font-bold text-xs block mb-2">02</span>
+                            <span class="text-gray-900 font-bold text-sm leading-snug block">Antiriciclaggio</span>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-2xl bg-gray-50/50">
+                            <span class="text-[#3a7aba] font-bold text-xs block mb-2">03</span>
+                            <span class="text-gray-900 font-bold text-sm leading-snug block">Organizzazione dello Studio</span>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-2xl bg-gray-50/50">
+                            <span class="text-[#3a7aba] font-bold text-xs block mb-2">04</span>
+                            <span class="text-gray-900 font-bold text-sm leading-snug block">Comunicazione digitale</span>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-2xl bg-gray-50/50">
+                            <span class="text-[#3a7aba] font-bold text-xs block mb-2">05</span>
+                            <span class="text-gray-900 font-bold text-sm leading-snug block">Controllo di gestione</span>
+                        </div>
+                    </div>
+
+                    <!-- FOOTER BENENVENTO CON INFO E PULSANTE -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pt-6 border-t border-gray-100 gap-4">
+                        <div>
+                            <p class="text-xs font-bold text-gray-900 mb-0.5">5 domande · circa 2 minuti</p>
+                            <p class="text-xs text-gray-500">Scopri il livello di evoluzione del tuo Studio e l'area su cui intervenire.</p>
+                        </div>
+                        <button type="button" onclick="goToForm()" class="bg-[#3a7aba] hover:bg-[#2d6195] text-white font-bold py-3.5 px-8 rounded-xl transition shadow-lg inline-flex items-center justify-center shrink-0">
+                            Inizia il check-up &rarr;
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 0: DATI DELLO STUDIO (FORM) -->
+            <div class="step-content hidden" id="step-0">
                 <div>
                     <span class="text-xs font-bold tracking-widest text-[#3a7aba] uppercase block mb-1">DATI DELLO STUDIO</span>
-                    <h1 class="text-4xl font-black text-gray-900 mb-2">Prima di iniziare</h1>
+                    <h2 class="text-3xl font-black text-gray-900 mb-2">Prima di iniziare</h2>
                     <p class="text-gray-600 mb-8">Inserisci i dati dello Studio. Serviranno per associare il risultato e preparare il report finale.</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nome dello Studio *</label>
-                            <input type="text" name="nome_studio" placeholder="Es. Studio Notarile Rossi" required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
+                            <input type="text" name="nome_studio" placeholder="Es. Studio Notarile Marco Tribuzio" required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Luogo *</label>
-                            <input type="text" name="luogo" placeholder="Es. Milano" required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
+                            <input type="text" name="luogo" placeholder="Es. Roma" required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nome del Notaio *</label>
@@ -54,7 +107,7 @@
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-1">E-mail *</label>
-                            <input type="email" name="email" placeholder="nome@studio.it" required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
+                            <input type="email" name="email" placeholder="Indirizzo E-Mail" required class="w-full p-3.5 border border-gray-300 rounded-2xl bg-gray-50 focus:outline-none focus:border-[#3a7aba]">
                         </div>
                     </div>
                 </div>
@@ -295,9 +348,9 @@
                 </div>
             </div>
 
-            <!-- PULSANTI DI NAVIGAZIONE IN BASSO -->
-            <div class="flex justify-between items-center pt-8 mt-6 border-t border-gray-100">
-                <button type="button" id="btnPrev" onclick="changeStep(-1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-xl transition hidden">
+            <!-- PULSANTI DI NAVIGAZIONE MULTI-STEP -->
+            <div id="navBar" class="flex justify-between items-center pt-8 mt-6 border-t border-gray-100 hidden">
+                <button type="button" id="btnPrev" onclick="changeStep(-1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-xl transition">
                     ← Indietro
                 </button>
                 
@@ -316,34 +369,44 @@
     </div>
 
     <script>
-    let currentStep = 0;
+    let currentStep = 'welcome';
     const totalSteps = 5;
 
     function showStep(step) {
         document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
-        document.getElementById(`step-${step}`).classList.remove('hidden');
 
+        const navBar = document.getElementById('navBar');
         const btnPrev = document.getElementById('btnPrev');
         const btnNext = document.getElementById('btnNext');
         const btnSubmit = document.getElementById('btnSubmit');
 
-        if (step === 0) {
-            btnPrev.classList.add('hidden');
-            btnNext.classList.remove('hidden');
-            btnSubmit.classList.add('hidden');
-        } else if (step === totalSteps) {
-            btnPrev.classList.remove('hidden');
-            btnNext.classList.add('hidden');
-            btnSubmit.classList.remove('hidden');
+        if (step === 'welcome') {
+            document.getElementById('step-welcome').classList.remove('hidden');
+            navBar.classList.add('hidden');
         } else {
-            btnPrev.classList.remove('hidden');
-            btnNext.classList.remove('hidden');
-            btnSubmit.classList.add('hidden');
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+            navBar.classList.remove('hidden');
+
+            if (step === 0) {
+                btnPrev.classList.remove('hidden');
+                btnNext.classList.remove('hidden');
+                btnSubmit.classList.add('hidden');
+            } else if (step === totalSteps) {
+                btnPrev.classList.remove('hidden');
+                btnNext.classList.add('hidden');
+                btnSubmit.classList.remove('hidden');
+            } else {
+                btnPrev.classList.remove('hidden');
+                btnNext.classList.remove('hidden');
+                btnSubmit.classList.add('hidden');
+            }
         }
         currentStep = step;
     }
 
     function validateStep(step) {
+        if (step === 'welcome') return true;
+        
         const currentDiv = document.getElementById(`step-${step}`);
         if (!currentDiv) return true;
         
@@ -368,9 +431,13 @@
     }
 
     function validateAllSteps() {
-        for (let s = 0; s <= totalSteps; s++) {
+        if (!validateStep(0)) {
+            showStep(0);
+            return false;
+        }
+        for (let s = 1; s <= totalSteps; s++) {
             if (!validateStep(s)) {
-                showStep(s); // Riporta l'utente allo step dove manca il dato
+                showStep(s);
                 return false;
             }
         }
@@ -378,15 +445,28 @@
     }
 
     function changeStep(delta) {
+        if (currentStep === 'welcome') {
+            showStep(0);
+            return;
+        }
+
         if (delta > 0 && !validateStep(currentStep)) {
             return;
         }
-        
-        let nextStep = currentStep + delta;
-        if (nextStep < 0) nextStep = 0;
-        if (nextStep > totalSteps) nextStep = totalSteps;
 
-        showStep(nextStep);
+        if (delta < 0 && currentStep === 0) {
+            showStep('welcome');
+            return;
+        }
+
+        let nextStep = currentStep + delta;
+        if (nextStep < 0) showStep('welcome');
+        else if (nextStep > totalSteps) showStep(totalSteps);
+        else showStep(nextStep);
+    }
+
+    function goToForm() {
+        showStep(0);
     }
 
     function submitQuiz() {
@@ -395,7 +475,7 @@
         }
     }
 
-    showStep(0);
+    showStep('welcome');
 </script>
 </body>
 </html>
