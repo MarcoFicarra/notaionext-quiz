@@ -51,6 +51,24 @@
                     <div>21-25<br><span class="text-gray-700">Evoluto</span></div>
                 </div>
             </div>
+			<!-- BOX ATTIVAZIONE VOUCHER (FOTO 1 e 2) -->
+            <div class="mt-8 p-6 bg-white border border-gray-200 rounded-3xl text-left shadow-sm">
+                <div class="flex items-start gap-3 mb-5">
+                    <input type="checkbox" id="checkImpegno" class="mt-1 w-5 h-5 text-[#9f1c30] rounded border-gray-300 focus:ring-[#9f1c30] cursor-pointer">
+                    <label for="checkImpegno" class="text-xs font-semibold text-gray-700 leading-relaxed cursor-pointer select-none">
+                        Mi impegno a dedicare un momento del mio Studio per approfondire l'area individuata e valutare l'attivazione del servizio entro il <strong>31 dicembre 2026</strong>.
+                    </label>
+                </div>
+
+                <button id="btnAttivaVoucher" onclick="inviaRichiestaVoucher()" class="bg-[#3a7aba] hover:bg-[#801424] text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow-sm">
+                    Attiva il Voucher &rarr;
+                </button>
+
+                <!-- MESSAGGIO DI CONFERMA (INIZIALMENTE NASCOSTO) -->
+                <div id="msgConfermaVoucher" class="hidden mt-4 p-4 bg-[#eaf5ed] border border-[#d2e9d8] text-[#18582d] text-xs font-bold rounded-xl flex items-center gap-2">
+                    <span>✓</span> Richiesta presa in carico. Saremo disponibili per concordare il prossimo passo.
+                </div>
+            </div>
 
             <!-- BREAKDOWN PER SINGOLA AREA -->
             <div class="grid grid-cols-5 gap-2 mb-5">
@@ -122,6 +140,43 @@
             };
 
             html2pdf().set(opt).from(element).save();
+        }
+		async function inviaRichiestaVoucher() {
+            const check = document.getElementById('checkImpegno');
+            if (!check.checked) {
+                alert('Per procedere è necessario selezionare la casella di impegno.');
+                return;
+            }
+
+            const btn = document.getElementById('btnAttivaVoucher');
+            btn.disabled = true;
+            btn.innerText = 'Invio in corso...';
+
+            try {
+                const response = await fetch('/attiva-voucher', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: '{{ email }}',
+                        nome_studio: '{{ nome_studio }}'
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('msgConfermaVoucher').classList.remove('hidden');
+                    btn.classList.add('hidden');
+                    check.disabled = true;
+                } else {
+                    alert('Errore durante la registrazione. Riprova.');
+                    btn.disabled = false;
+                    btn.innerText = 'Attiva il Voucher →';
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Errore di connessione. Riprova.');
+                btn.disabled = false;
+                btn.innerText = 'Attiva il Voucher →';
+            }
         }
     </script>
 </body>

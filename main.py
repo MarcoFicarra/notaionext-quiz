@@ -202,6 +202,9 @@ async def calcola_risultati(
         context={
             "nome_studio": nome_studio,
             "nome_notaio": nome_notaio,
+            "email": email,  # <-- AGGIUNTO QUI
+            "telefono": telefono,
+            "luogo": luogo,
             "totale": totale,
             "profilo": profilo,
             "punteggi": punteggi,
@@ -210,4 +213,44 @@ async def calcola_risultati(
             "voucher_info": voucher_info,
             "percentuale_pos": percentuale_pos
         }
+        @app.post("/attiva-voucher")
+async def attiva_voucher(request: Request):
+    data = await request.json()
+    email_cliente = data.get("email")
+
+    # 1. Aggiorna SQLite locale
+    try:
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute("ALTER TABLE leads ADD COLUMN voucher_richiesto TEXT DEFAULT 'NO'")
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass  # La colonna esiste già
+
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("UPDATE leads SET voucher_richiesto = 'SÌ' WHERE email = ?", (email_cliente,))
+    conn.commit()
+    conn.close()
+
+    # 2. Aggiorna Google Sheets (Colonna J = Colonna 10)
+    try:
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive"
+        ]
+        creds = Credentials.from_service_account_file("credentials.json", scopes=scopes)
+        client = gspread.authorize(creds)
+        sheet = client.open("Risultati Quiz NotaioNext").sheet1
+
+        # Cerca la riga corrispondente all'email dell'utente
+        cell = sheet.find(email_cliente)
+        if cell:
+            sheet.update_cell(cell.row, 10, "SÌ")
+            print(f"Voucher attivato per {email_cliente} alla riga {cell.row}")
+    except Exception as e:
+        print(f"Errore durante l'aggiornamento del voucher su Google Sheets: {e}")
+
+    return {"status": "success"}
     )
