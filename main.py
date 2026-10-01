@@ -59,7 +59,7 @@ def salva_su_excel(nome_studio, nome_notaio, email, telefono, luogo, totale, pro
 # --- FUNZIONE NOTIFICA EMAIL GMAIL ---
 def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luogo, totale, profilo, area_prioritaria):
     mittente = "notaionextwki@gmail.com"
-    password = "TUA_PASSWORD_DI_16_LETTERE"  # <-- Sostituisci con la Password per le app di 16 lettere creata su Google
+    password = "jlutonuzwyahquvj"  # <-- Sostituisci con la Password per le app di 16 lettere creata su Google
     destinatario = "notaionextwki@gmail.com"
     server_smtp = "smtp.gmail.com"
     porta_smtp = 587
