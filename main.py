@@ -35,6 +35,11 @@ def init_db():
             voucher_richiesto TEXT DEFAULT 'NO'
         )
     ''')
+    # Aggiunge la colonna se il database era stato creato prima
+    try:
+        cursor.execute("ALTER TABLE leads ADD COLUMN voucher_richiesto TEXT DEFAULT 'NO'")
+    except sqlite3.OperationalError:
+        pass  # La colonna esiste già
     conn.commit()
     conn.close()
 
@@ -182,14 +187,17 @@ async def calcola_risultati(
     percentuale_pos = int(((totale - 5) / 20) * 100)
 
     # 1. Salvataggio SQLite
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO leads (nome_studio, nome_notaio, email, telefono, luogo, punteggio_totale, area_prioritaria, voucher_richiesto)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'NO')
-    ''', (nome_studio, nome_notaio, email, telefono, luogo, totale, area_prioritaria))
-    conn.commit()
-    conn.close()
+    try:
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO leads (nome_studio, nome_notaio, email, telefono, luogo, punteggio_totale, area_prioritaria, voucher_richiesto)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'NO')
+        ''', (nome_studio, nome_notaio, email, telefono, luogo, totale, area_prioritaria))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Errore durante il salvataggio in SQLite: {e}")
 
     # 2. Salvataggio Google Sheets
     salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria)
