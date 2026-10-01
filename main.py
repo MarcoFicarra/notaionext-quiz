@@ -5,16 +5,19 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import gspread
+from google.oauth2.service_account import Credentials
+
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from openpyxl import Workbook, load_workbook
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
 
 def init_db():
     conn = sqlite3.connect("database.db")
@@ -34,32 +37,35 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 init_db()
 
-# --- FUNZIONE SALVATAGGIO EXCEL ---
-def salva_su_excel(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria):
-    file_excel = "risultati_quiz.xlsx"
-    data_ora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    try:
-        if not os.path.exists(file_excel):
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "Leads Quiz"
-            ws.append(["Data/Ora", "Nome Studio", "Nome Notaio", "Email", "Telefono", "Luogo", "Punteggio Totale", "Profilo", "Area Prioritaria"])
-        else:
-            wb = load_workbook(file_excel)
-            ws = wb.active
 
-        ws.append([data_ora, nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria])
-        wb.save(file_excel)
+# --- FUNZIONE SALVATAGGIO SU GOOGLE SHEETS ---
+def salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria):
+    try:
+        scopes = [
+            "https://www.googleapis.com/auth/spreadsheets",
+            "https://www.googleapis.com/auth/drive"
+        ]
+        creds = Credentials.from_service_account_file("credentials.json", scopes=scopes)
+        client = gspread.authorize(creds)
+        
+        # Abre il foglio Google "Risultati Quiz NotaioNext"
+        sheet = client.open("Risultati Quiz NotaioNext").sheet1
+        data_ora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Inserisce la riga in fondo al foglio
+        sheet.append_row([data_ora, nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria])
+        print("Dati salvati con successo su Google Sheets!")
     except Exception as e:
-        print(f"Errore durante la scrittura su Excel: {e}")
+        print(f"Errore durante il salvataggio su Google Sheets: {e}")
+
 
 # --- FUNZIONE NOTIFICA EMAIL GMAIL ---
 def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luogo, totale, profilo, area_prioritaria):
     mittente = "notaionextwki@gmail.com"
-    password = "jlutonuzwyahquvj"  # <-- Sostituisci con la Password per le app di 16 lettere creata su Google
+    password = "jlut onuz wyah quvj"  # <-- Sostituisci con la tua Password per le App di 16 lettere creata su Google
     destinatario = "notaionextwki@gmail.com"
     server_smtp = "smtp.gmail.com"
     porta_smtp = 587
@@ -88,7 +94,7 @@ def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luog
 
     Data compilazione: {datetime.now().strftime("%d/%m/%Y %H:%M")}
     --------------------------------------------------
-    I dati sono stati salvati automaticamente anche nel file Excel 'risultati_quiz.xlsx' sul server IONOS.
+    I dati sono stati salvati automaticamente anche su Google Sheets e nel DB SQLite locale.
     """
     msg.attach(MIMEText(corpo, 'plain', 'utf-8'))
 
@@ -101,6 +107,7 @@ def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luog
         print("Notifica email inviata con successo!")
     except Exception as e:
         print(f"Errore durante l'invio dell'e-mail: {e}")
+
 
 # Mappatura dei Voucher d'offerta per ogni Area Prioritaria
 VOUCHER_MAP = {
@@ -126,9 +133,11 @@ VOUCHER_MAP = {
     }
 }
 
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
+
 
 @app.post("/calcola", response_class=HTMLResponse)
 async def calcola_risultati(
@@ -169,7 +178,7 @@ async def calcola_risultati(
 
     percentuale_pos = int(((totale - 5) / 20) * 100)
 
-    # 1. Salvataggio in SQLite
+    # 1. Salvataggio nel Database SQLite locale
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
     cursor.execute('''
@@ -179,8 +188,8 @@ async def calcola_risultati(
     conn.commit()
     conn.close()
 
-    # 2. Salvataggio automatico nel file Excel (risultati_quiz.xlsx)
-    salva_su_excel(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria)
+    # 2. Salvataggio in tempo reale su Google Sheets
+    salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria)
 
     # 3. Invia notifica e-mail via Gmail
     invia_email_notifica(nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria)
