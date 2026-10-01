@@ -56,9 +56,9 @@ def salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, tot
         data_ora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         # Inserisce la nuova riga alla posizione 2
-        sheet.insert_row(
+       # Aggiunge la riga in coda, permettendo a Google di applicare i colori alternati in automatico
+        sheet.append_row(
             [data_ora, nome_studio, nome_notaio, email, telefono, luogo, totale, profilo, area_prioritaria],
-            index=2,
             value_input_option="USER_ENTERED"
         )
         print("Dati salvati con successo su Google Sheets!")
