@@ -2,6 +2,7 @@ import os
 import smtplib
 import sqlite3
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -58,7 +59,9 @@ def salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, tot
         client = gspread.authorize(creds)
         
         sheet = client.open("Risultati Quiz NotaioNext").sheet1
-        data_ora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Fuso orario italiano con data nel formato GG-MM-AAAA HH:MM:SS
+        tz_italia = ZoneInfo("Europe/Rome")
+        data_ora = datetime.now(tz_italia).strftime("%d-%m-%Y %H:%M:%S")
         
         # Inserisce in riga 2 con colonna J (Voucher Richiesto) impostata inizialmente a 'NO'
         sheet.insert_row(
@@ -74,10 +77,14 @@ def salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, tot
 # --- FUNZIONE NOTIFICA EMAIL GMAIL ---
 def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luogo, totale, profilo, area_prioritaria):
     mittente = "notaionextwki@gmail.com"
-    password = "jlut onuz wyah quvj"  # <-- Sostituisci con la tua Password per le App di 16 lettere
+    password = "jlutonuzwyahquvj"  # <-- Sostituisci con la tua Password per le App
     destinatario = "notaionextwki@gmail.com"
     server_smtp = "smtp.gmail.com"
     porta_smtp = 587
+
+    # 1. Calcola la data e l'ora esatta con fuso orario italiano
+    tz_italia = ZoneInfo("Europe/Rome")  # <-- AGGIUNTO QUI
+    data_compilazione = datetime.now(tz_italia).strftime("%d-%m-%Y %H:%M:%S")  # <-- AGGIUNTO QUI
 
     msg = MIMEMultipart()
     msg['From'] = mittente
@@ -101,7 +108,7 @@ def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luog
     Profilo Risultante: {profilo}
     Area Prioritaria da Intervenire: {area_prioritaria}
 
-    Data compilazione: {datetime.now().strftime("%d/%m/%Y %H:%M")}
+    Data compilazione: {data_compilazione}  # <-- USATO QUI AL POSTO DI datetime.now()
     --------------------------------------------------
     I dati sono stati salvati automaticamente su Google Sheets e SQLite.
     """
