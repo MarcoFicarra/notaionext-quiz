@@ -74,7 +74,7 @@ def salva_su_google_sheets(nome_studio, nome_notaio, email, telefono, luogo, tot
 # --- FUNZIONE NOTIFICA EMAIL GMAIL ---
 def invia_email_notifica(nome_studio, nome_notaio, email_cliente, telefono, luogo, totale, profilo, area_prioritaria):
     mittente = "notaionextwki@gmail.com"
-    password = "TUA_PASSWORD_DI_16_LETTERE"  # <-- Sostituisci con la tua Password per le App di 16 lettere
+    password = "jlut onuz wyah quvj"  # <-- Sostituisci con la tua Password per le App di 16 lettere
     destinatario = "notaionextwki@gmail.com"
     server_smtp = "smtp.gmail.com"
     porta_smtp = 587
